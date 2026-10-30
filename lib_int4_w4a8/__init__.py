@@ -7,12 +7,14 @@
 #
 # The choice is written into the loaded model's weights at the first step of every sampling run, so a change applies
 # at the next generation without reloading the checkpoint, whatever the architecture.
+# Forge Neo's own --force-w4a8 launch option sets "int8" at load time; the checkpoint's value is gone by then, so
+# with it the INT8 path is all there is and "As stored" can only say so.
 # No Forge imports at module level: the CPU tests run it as is.
 
 import dataclasses
 import logging
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 logger = logging.getLogger("int4_w4a8")
 
@@ -40,6 +42,19 @@ def _opts():
 
 def choice() -> str:
     return getattr(_opts(), OPTION, DEFAULT)
+
+
+def forced() -> bool:
+    """Forge Neo was launched with --force-w4a8 (older Forge Neo: no such option)."""
+    try:
+        from backend.args import args
+
+        return bool(getattr(args, "force_w4a8", False))
+    except Exception:  # outside Forge Neo (CPU tests)
+        return False
+
+
+_forced_noted = False
 
 
 def wanted(stored: str) -> str:
@@ -71,8 +86,13 @@ def _diffusion_model():
 
 def on_cfg_denoiser(params) -> None:
     # script_callbacks.on_cfg_denoiser; the denoiser counts its calls from 0 in each sampling run (hires pass included)
+    global _forced_noted
     if getattr(getattr(params, "denoiser", None), "step", None) != 0:
         return
+    if choice() == STORED and not _forced_noted and forced():
+        _forced_noted = True
+        print("[INT4 W4A8] Forge Neo was launched with --force-w4a8: INT4 checkpoints stay on INT8 (W4A8), "
+              "'As stored' needs a launch without it")
     try:
         model = _diffusion_model()
         if model is not None and apply(model):

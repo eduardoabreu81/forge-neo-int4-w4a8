@@ -54,6 +54,20 @@ def test_a_checkpoint_asking_for_int8_stays_int8():
     assert dtypes(net) == ["int8"]
 
 
+def test_force_w4a8_is_noted_once_for_as_stored(capsys):
+    # with --force-w4a8 the weights already load as int8: "As stored" has nothing to go back to
+    net = torch.nn.Sequential(linear(linear_dtype="int8"))
+    step0 = mock.Mock(denoiser=mock.Mock(step=0))
+    with (mock.patch.object(int4, "_diffusion_model", return_value=net),
+          mock.patch.object(int4, "choice", return_value=int4.STORED),
+          mock.patch.object(int4, "forced", return_value=True),
+          mock.patch.object(int4, "_forced_noted", False)):
+        int4.on_cfg_denoiser(step0)
+        int4.on_cfg_denoiser(step0)
+    assert capsys.readouterr().out.count("--force-w4a8") == 1
+    assert dtypes(net) == ["int8"]
+
+
 def test_only_the_first_step_applies():
     with mock.patch.object(int4, "_diffusion_model", return_value=model()) as found:
         int4.on_cfg_denoiser(mock.Mock(denoiser=mock.Mock(step=3)))

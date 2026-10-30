@@ -4,7 +4,7 @@
 
 [![Forge Neo](https://img.shields.io/badge/Forge-Neo-blue)](https://github.com/Haoming02/sd-webui-forge-classic/tree/neo)
 [![Gradio](https://img.shields.io/badge/Gradio-4.40.0-orange)](https://gradio.app/)
-[![Version](https://img.shields.io/badge/Version-0.1.0-brightgreen)](https://github.com/eduardoabreu81/forge-neo-int4-w4a8)
+[![Version](https://img.shields.io/badge/Version-0.1.1-brightgreen)](https://github.com/eduardoabreu81/forge-neo-int4-w4a8)
 [![License](https://img.shields.io/badge/License-AGPL--3.0-green.svg)](LICENSE)
 
 > **Extension for [Stable Diffusion WebUI Forge - Neo](https://github.com/Haoming02/sd-webui-forge-classic/tree/neo)**
@@ -12,6 +12,9 @@
 </div>
 
 Cleaner pictures from the small **INT4 checkpoints** shared by the community - the ones made for 8 GB cards, for Krea 2, MOSS-Image and other models. Same file, same memory, no conversion: the extension just runs them with more precision.
+
+> [!Tip]
+> **Forge Neo can now do this on its own.** If you just want INT4 checkpoints to always run this way, add `--force-w4a8` to your launch options (for example `set COMMANDLINE_ARGS=--force-w4a8` in `webui-user.bat`) on an up-to-date Forge Neo - no extension needed. This extension is for switching between the two ways **from the Settings, with no restart**: comparing them on the same seed, or going back to the file's own way for one checkpoint.
 
 > [!Important]
 > This extension requires an up-to-date **Forge Neo** (the `neo` branch). If something goes wrong it says so in the console and the checkpoint runs the way the file asks - Forge Neo itself keeps working as usual.
@@ -29,6 +32,11 @@ Cleaner pictures from the small **INT4 checkpoints** shared by the community - t
 ---
 
 ## 🆕 What's New
+
+### v0.1.1 - Forge Neo's Own Switch
+
+- Forge Neo added its own **`--force-w4a8`** launch option for this, so the extension is now the way to **switch without a restart**; see the tip at the top
+- Launched with `--force-w4a8`, **As stored** cannot bring the 4-bit working numbers back (Forge Neo sets them while loading): the console now says so once instead of silently doing nothing
 
 ### v0.1.0 - First Release
 
@@ -61,6 +69,8 @@ Under **Settings → Stable Diffusion → [INT4 W4A8] Activations of INT4 ConvRo
 | **As stored (W4A4)** | the way the file asks for, 4 bits for both |
 
 The change applies at the next generation, with no restart and no reload of the checkpoint.
+
+If Forge Neo was launched with `--force-w4a8`, the checkpoints always run as **INT8 (W4A8)** and **As stored** has no effect - launch without it to use both choices.
 
 ### 🧩 Which Checkpoints
 
